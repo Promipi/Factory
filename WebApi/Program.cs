@@ -34,7 +34,7 @@ namespace WebApi
             //logging
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Information() 
-                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
                 .Enrich.FromLogContext()
                 .WriteTo.Console() 
                 .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day) 
