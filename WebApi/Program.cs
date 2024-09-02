@@ -1,11 +1,15 @@
 
+using AutoMapper;
 using Common.Core.Domain;
+using Common.Core.Profiles;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Data;
+using System.Reflection;
 using System.Text;
 using WebApi.Configuration.Settings;
 
@@ -78,10 +82,23 @@ namespace WebApi
                 };
             });
 
+            //Mapper
+            builder.Services.AddSingleton(new MapperConfiguration(mapper =>
+            {
+                mapper.AddProfile<ProductProfile>();
+                mapper.AddProfile<SaleProfile>();
+
+            }).CreateMapper());
+
             builder.Services.AddAuthorization();
      
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+            });
+
+            builder.Services.AddMemoryCache();
 
             #endregion
 
@@ -91,12 +108,18 @@ namespace WebApi
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+                });
             }
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
+
             app.UseAuthorization();
+
 
 
             app.MapControllers();

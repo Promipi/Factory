@@ -1,6 +1,25 @@
-﻿namespace WebApi.Controllers
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace WebApi.Controllers
 {
-    public class CustomersController
+    [ApiController]
+    [Route("/api/auth")]
+    [Authorize]
+    public sealed class CustomersController : ControllerBase
     {
+        public CustomersController()
+        {
+
+        }
+
+        [HttpGet("GetCustomers")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public IActionResult GetCustomers()
+        {
+            return Ok("Customers");
+        }
     }
+    
 }
