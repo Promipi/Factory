@@ -3,12 +3,14 @@ using Common.Collection;
 using Common.Core.Contracts.Products;
 using Common.Core.Domain;
 using Infrastructure.Data;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [EnableCors("FactoryPolicy")]
     public class ProductsController : ControllerBase
     {
 
@@ -24,7 +26,7 @@ namespace WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<DataCollection<Product>>> GetProducts(int page=1,int take=10,string contains="")
+        public async Task<ActionResult<DataCollection<Product>>> GetProducts(int page=1,int take=10,string contains="",string category="")
         {
             //filters
             Func<Product, bool> filter = new Func<Product, bool>(x => x.Id == x.Id);

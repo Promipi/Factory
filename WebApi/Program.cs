@@ -120,9 +120,9 @@ namespace WebApi
 
             app.UseAuthorization();
 
-
-
             app.MapControllers();
+
+            app.UseCors("FactoryPolicy");
             #endregion
 
             app.Run();

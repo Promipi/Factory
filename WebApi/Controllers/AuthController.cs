@@ -1,6 +1,7 @@
 ﻿using Common.Core.Contracts.Auth;
 using Common.Core.Domain;
 using Infrastructure.Data;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +16,7 @@ namespace WebApi.Controllers
 {
     [ApiController]
     [Route("/api/auth")]
+    [EnableCors("FactoryPolicy")]
     public sealed class AuthController : ControllerBase
     {
         private readonly DataContext _context;

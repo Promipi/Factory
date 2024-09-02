@@ -3,12 +3,14 @@ using Common.Collection;
 using Common.Core.Contracts.Sales;
 using Common.Core.Domain;
 using Infrastructure.Data;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [EnableCors("FactoryPolicy")]
     public class SalesController : ControllerBase
     {
         private readonly ILogger<ProductsController> _logger;
@@ -73,7 +75,8 @@ namespace WebApi.Controllers
                     
             }
 
-            await _context.Sales.AddAsync(saleToAdd);
+            var saleSaved = await _context.Sales.AddAsync(saleToAdd);
+
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetSale", new { id = saleToAdd.Id }, saleToAdd);
@@ -94,7 +97,7 @@ namespace WebApi.Controllers
 
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok("Sale Updated");
         }
 
         [HttpDelete("{id}")]
@@ -110,7 +113,7 @@ namespace WebApi.Controllers
             _context.Sales.Remove(sale);
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok("Sale Deleted");
         }
     }
 }
