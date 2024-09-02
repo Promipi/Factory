@@ -24,6 +24,15 @@ namespace WebApi.Controllers
             _mapper = mapper;
         }
 
+        /// <summary>
+        /// Retrieves a paginated list of sales with optional filtering by customer ID.
+        /// </summary>
+        /// <param name="page">The page number to retrieve.</param>
+        /// <param name="take">The number of records per page.</param>
+        /// <param name="customerId">An optional customer ID to filter sales by customer.</param>
+        /// <returns>A paginated list of sales.</returns>
+        /// <response code="200">Returns the paginated list of sales.</response>
+        /// <response code="400">Returns a Bad Request if the request parameters are invalid.</response>
         [HttpGet]
         public async Task<ActionResult<DataCollection<Sale>>> GetSales(int page = 1, int take = 10, string customerId = "")
         {
@@ -36,6 +45,13 @@ namespace WebApi.Controllers
             return Ok(sales);
         }
 
+        /// <summary>
+        /// Retrieves a sale by its ID.
+        /// </summary>
+        /// <param name="id">The ID of the sale to retrieve.</param>
+        /// <returns>The sale with the specified ID.</returns>
+        /// <response code="200">Returns the sale with the specified ID.</response>
+        /// <response code="404">Returns Not Found if the sale with the specified ID does not exist.</response>
         [HttpGet("{id}")]
         public async Task<ActionResult<Sale>> GetSale(string id)
         {
@@ -50,10 +66,12 @@ namespace WebApi.Controllers
         }
 
         /// <summary>
-        /// Crea una nueva venta.
+        /// Creates a new sale.
         /// </summary>
-        /// <param name="saleCreateDto">Los detalles de la venta a crear.</param>
-        /// <returns>Resultado de la operación.</returns>
+        /// <param name="sale">The sale data to create.</param>
+        /// <returns>The created sale.</returns>
+        /// <response code="201">Returns the created sale with the location of the newly created resource.</response>
+        /// <response code="400">Returns Bad Request if the product specified in the sale does not exist.</response>
         [HttpPost]
         public async Task<ActionResult<Sale>> CreateSale([FromBody] SaleCreateDto sale)
         {
@@ -61,18 +79,18 @@ namespace WebApi.Controllers
             var saleToAdd = _mapper.Map<Sale>(sale);
 
             //set the total
-            foreach(var item in saleToAdd.Items)
+            foreach (var item in saleToAdd.Items)
             {
-                 
                 var product = await _context.Products.FindAsync(item.ProductId);
-                if(product != null) {
+                if (product != null)
+                {
                     item.SubTotal = product.Price * item.Quantity;
                     saleToAdd.Total += product.Price * item.Quantity;
-                } 
-                else {
-                    return BadRequest($"The product with {item.ProductId} doesn't exits ");
                 }
-                    
+                else
+                {
+                    return BadRequest($"The product with {item.ProductId} doesn't exist.");
+                }
             }
 
             var saleSaved = await _context.Sales.AddAsync(saleToAdd);
@@ -82,6 +100,14 @@ namespace WebApi.Controllers
             return CreatedAtAction("GetSale", new { id = saleToAdd.Id }, saleToAdd);
         }
 
+        /// <summary>
+        /// Updates an existing sale by its ID.
+        /// </summary>
+        /// <param name="id">The ID of the sale to update.</param>
+        /// <param name="sale">The updated sale data.</param>
+        /// <returns>An action result indicating the outcome of the update operation.</returns>
+        /// <response code="200">Returns Ok if the sale was successfully updated.</response>
+        /// <response code="404">Returns Not Found if the sale with the specified ID does not exist.</response>
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateSale(string id, SaleUpdateDto sale)
         {
@@ -100,6 +126,13 @@ namespace WebApi.Controllers
             return Ok("Sale Updated");
         }
 
+        /// <summary>
+        /// Deletes a sale by its ID.
+        /// </summary>
+        /// <param name="id">The ID of the sale to delete.</param>
+        /// <returns>An action result indicating the outcome of the delete operation.</returns>
+        /// <response code="200">Returns Ok if the sale was successfully deleted.</response>
+        /// <response code="404">Returns Not Found if the sale with the specified ID does not exist.</response>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteSale(string id)
         {

@@ -25,6 +25,16 @@ namespace WebApi.Controllers
             _mapper = mapper;
         }
 
+        /// <summary>
+        /// Retrieves a list of products with pagination and optional filters.
+        /// </summary>
+        /// <param name="page">Page number for pagination.</param>
+        /// <param name="take">Number of items per page.</param>
+        /// <param name="contains">String to filter products by name.</param>
+        /// <param name="category">Category to filter products by.</param>
+        /// <returns>A collection of filtered and paginated products.</returns>
+        [ProducesResponseType(typeof(DataCollection<Product>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [HttpGet]
         public async Task<ActionResult<DataCollection<Product>>> GetProducts(int page=1,int take=10,string contains="",string category="")
         {
@@ -36,7 +46,13 @@ namespace WebApi.Controllers
 
             return Ok(products);
         }
-
+        /// <summary>
+        /// Retrieves a product by its ID.
+        /// </summary>
+        /// <param name="id">Product ID.</param>
+        /// <returns>The product corresponding to the specified ID.</returns>
+        [ProducesResponseType(typeof(Product), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [HttpGet("{id}", Name = "")]
         public async Task<ActionResult<Product>> GetProduct(int id)
         {
@@ -49,7 +65,15 @@ namespace WebApi.Controllers
 
             return Ok(product);
         }
-        
+
+
+        /// <summary>
+        /// Creates a new product.
+        /// </summary>
+        /// <param name="product">Product data to create.</param>
+        /// <returns>The created product.</returns>
+        [ProducesResponseType(typeof(Product), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [HttpPost]
         public async Task<ActionResult<Product>> CreateProduct(ProductCreateDto product)
         {
@@ -62,6 +86,14 @@ namespace WebApi.Controllers
             return CreatedAtAction("GetProduct", new { id = productToAdd.Id }, productToAdd);
         }
 
+        /// <summary>
+        /// Updates an existing product.
+        /// </summary>
+        /// <param name="product">Product data to update.</param>
+        /// <returns>The updated product.</returns>
+        [ProducesResponseType(typeof(Product), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [HttpPut]
         public async Task<ActionResult<Product>> UpdateProduct(ProductUpdateDto product)
         {
@@ -81,7 +113,14 @@ namespace WebApi.Controllers
             return Ok(productToUpdate);
         }
 
+        /// <summary>
+        /// Deletes a product by its ID.
+        /// </summary>
+        /// <param name="id">Product ID.</param>
+        /// <returns>A status message indicating the result of the operation.</returns>
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<Product>> DeleteProduct(string id)
         {
             var product = await _context.Products.FindAsync(id);

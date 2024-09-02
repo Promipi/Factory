@@ -17,6 +17,7 @@ namespace WebApi.Controllers
     [ApiController]
     [Route("/api/auth")]
     [EnableCors("FactoryPolicy")]
+    [Produces("application/json")]
     public sealed class AuthController : ControllerBase
     {
         private readonly DataContext _context;
@@ -32,6 +33,18 @@ namespace WebApi.Controllers
             _configuration = configuration;
         }
 
+        /// <summary>
+        /// Logs in a user with the provided credentials.
+        /// </summary>
+        /// <param name="request">The login request containing email and password.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Returns a token if login is successful; otherwise, returns appropriate status codes.</returns>
+        /// <response code="200">Returns the authentication token.</response>
+        /// <response code="204">No content if the user is not found.</response>
+        /// <response code="403">Forbidden if the password is incorrect.</response>
+        [ProducesResponseType(typeof(string), 200)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(403)]
         [HttpPost("LogIn")]
         public async Task<IActionResult> Login([FromBody] LoginDto request,
             CancellationToken cancellationToken = default)
@@ -49,6 +62,14 @@ namespace WebApi.Controllers
             return Ok(token);
         }
 
+        /// <summary>
+        /// Creates a new user account with the provided details.
+        /// </summary>
+        /// <param name="request">The account creation request containing user details.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Returns an access token upon successful account creation.</returns>
+        /// <response code="201">Returns the authentication token if the account is created successfully.</response>
+        /// <response code="400">Bad request if there is an error while creating the user.</response>
         [HttpPost("SignUp")]
         public async Task<IActionResult> CreateAccount([FromBody] CreateAccountDto request,
             CancellationToken cancellationToken = default)
