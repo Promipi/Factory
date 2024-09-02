@@ -1,4 +1,8 @@
 
+using Common.Core.Domain;
+using Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
+
 namespace WebApi
 {
     public class Program
@@ -8,6 +12,14 @@ namespace WebApi
             var builder = WebApplication.CreateBuilder(args);
 
             #region Services
+
+            builder.Services.AddDbContext<DataContext>(options =>
+            {
+                options.UseOracle(builder.Configuration.GetConnectionString("DefaultConnection"), config =>
+                {
+                    config.MigrationsAssembly("Infrastructure");
+                });
+            });
 
             builder.Services.AddControllers();
             
