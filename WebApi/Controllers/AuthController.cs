@@ -49,6 +49,8 @@ namespace WebApi.Controllers
         public async Task<IActionResult> Login([FromBody] LoginDto request,
             CancellationToken cancellationToken = default)
         {
+
+            
             var user = await _signInManager.UserManager.FindByEmailAsync(request.Email);
             if (user is null)
                 return NoContent();

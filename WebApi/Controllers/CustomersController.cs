@@ -11,18 +11,11 @@ namespace WebApi.Controllers
     [Route("api/[controller]")]
     [EnableCors("FactoryPolicy")]
     [Authorize]
-    public sealed class CustomersController : ControllerBase
+    public sealed class CustomersController(ILogger<ProductsController> logger, DataContext dataContext, IMapper mapper) : ControllerBase
     {
-        private readonly ILogger<ProductsController> _logger;
-        private readonly DataContext _context;
-        private readonly IMapper _mapper;
-
-        public CustomersController(ILogger<ProductsController> logger, DataContext dataContext, IMapper mapper)
-        {           
-            _logger = logger;
-            _context = dataContext;
-            _mapper = mapper;
-        }
+        private readonly ILogger<ProductsController> _logger = logger;
+        private readonly DataContext _context = dataContext;
+        private readonly IMapper _mapper = mapper;
 
         /// <summary>
         /// Gets all customers.

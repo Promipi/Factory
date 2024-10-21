@@ -1,4 +1,5 @@
-
+using Hangfire;
+using Hangfire.MemoryStorage;
 using AutoMapper;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -21,6 +22,7 @@ using WebApi.Configuration.Startup;
 using Common.Core.Validators;
 using WebApi.Helpers;
 using WebApi.Configuration.Middlewares;
+using Serilog.Filters;
 
 namespace WebApi
 {
@@ -31,10 +33,23 @@ namespace WebApi
             var builder = WebApplication.CreateBuilder(args);
 
             #region Services
+
+            builder.Services.AddHangfire(config =>
+            {
+                config.UseMemoryStorage();
+            });
+
+            builder.Services.AddHangfireServer(config =>
+            {
+                
+            });
+
+
             //logging
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Information() 
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+                .Filter.ByExcluding(Matching.WithProperty<string>("RequestPath", path => path.StartsWith("/hangfire/")))
                 .Enrich.FromLogContext()
                 .WriteTo.Console() 
                 .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day) 
@@ -82,7 +97,6 @@ namespace WebApi
             });
 
             builder.Services.AddValidatorsFromAssemblyContaining<LoginDtoValidator>();
-            builder.Services.AddValidatorsFromAssemblyContaining<ProductDtoValidator>(); //and so on..
 
             builder.ConfigureIdentity(); //Extension method to configure identity
 
@@ -112,8 +126,8 @@ namespace WebApi
             var app = builder.Build();
 
             #region Pipeline
-            if (app.Environment.IsDevelopment())
-            {
+            //if (app.Environment.IsDevelopment())
+            //{
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI(c =>
@@ -121,7 +135,9 @@ namespace WebApi
                     c.SwaggerEndpoint("/swagger/v1/swagger.json", "GENERAL V1");
                     c.RoutePrefix = "docs"; // Set Swagger UI at the docs route
                 });
-            }
+
+                app.UseHangfireDashboard();
+            //}
 
             app.UseMiddleware<ExceptionMiddleware>(); //Middleware for exeptions
             app.UseExceptionHandler("/Home/Error");
@@ -134,6 +150,13 @@ namespace WebApi
             app.UseAuthorization();
 
             app.MapControllers();
+
+
+            app.MapGet("/swagger", context =>
+            {
+                context.Response.Redirect("/docs", permanent: true);
+                return Task.CompletedTask;
+            });
 
             app.UseCors("FactoryPolicy");
             #endregion
